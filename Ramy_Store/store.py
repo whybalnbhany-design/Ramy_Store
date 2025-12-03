@@ -88,8 +88,8 @@ def search():
         
         results = db.execute(
             'SELECT product_id, name, price, image_url, category, details FROM products'
-            ' WHERE LOWER(name) LIKE LOWER(CONCAT("%", ?, "%"))'
-            ' OR LOWER(details) LIKE LOWER(CONCAT("%", ?, "%"))'
+            " WHERE LOWER(name) LIKE LOWER('%' || ? || '%')"
+            " OR LOWER(details) LIKE LOWER('%' || ? || '%')"
             ,(query,query)
         ).fetchall()
 
