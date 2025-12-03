@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رسالة الدفع</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.min.css') }}">
+    <style>
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body class="bg-light d-flex justify-content-center align-items-center vh-100">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-lg border-0 rounded-4 p-4 text-center bg-white">
+                    <h2 class="fw-bold mb-4 text-primary">✨ رائع! لقد وصلت إلى خطوة الدفع </i></h2>
+                    <p class="fs-5 text-secondary mb-3">
+                        لا تقلق — هذا مجرد <span class="fw-bold">متجر تجريبي</span>، ولن يتم تنفيذ أي عملية حقيقية.
+                    </p>
+                    <p class="fs-5">استمتع بالتجربة وتصفح بكل راحة 😊</p>
+
+                    <div class="d-flex justify-content-center gap-3 mt-3">
+                        <a class="btn btn-primary btn-lg rounded-pill px-4" href="{{ url_for('store.index') }}">العودة
+                            للمتجر</a>
+                        <a class="btn btn-outline-secondary btn-lg rounded-pill px-4"
+                            href="{{ url_for('store.cart') }}"> عرض السلة</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

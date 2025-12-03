@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>صفحة البحث</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <style>
+    /* تخصيص صغير لضبط المسافات وحجم الزر */
+    .search-nav {
+      padding: 0.5rem 1rem;
+    }
+
+    .search-input {
+      min-height: 44px;
+    }
+
+    .search-btn {
+      min-width: 120px;
+      min-height: 42px;
+    }
+
+    /* على الشاشات الصغيرة نريد أن يكون الحقل ممتدًا فوق الزر */
+    @media (max-width: 576px) {
+      .nav-search-row {
+        flex-direction: column-reverse;
+        gap: .5rem;
+      }
+
+    }
+
+    /* مسافة أفقية من جهة اللوغو */
+    .logo-margin {
+      margin-left: 1rem;
+    }
+
+    .flash-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      max-width: 400px;
+    }
+
+    .flash-message {
+      background: linear-gradient(135deg, #005d66 0%, #008c96 100%);
+      color: #ffffff;
+      padding: 0;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      animation: slideInRight 0.5s ease-out;
+      position: relative;
+    }
+
+
+    .flash-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+    }
+
+    .flash-text {
+      flex: 1;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .flash-progress {
+      height: 3px;
+      background: rgba(255, 255, 255, 0.5);
+      width: 100%;
+      transform-origin: left;
+      animation: progressBar 5s linear forwards;
+    }
+
+    /* Animations */
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOutRight {
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes progressBar {
+      from {
+        transform: scaleX(1);
+      }
+
+      to {
+        transform: scaleX(0);
+      }
+    }
+
+    .flash-message.hide {
+      animation: slideOutRight 0.5s ease-in forwards;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .flash-container {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+      }
+    }
+  </style>
+  <style>
+    .back-to-top {
+      position: fixed;
+      left: 20px;
+      /* وضعها في اليسار */
+      bottom: 30px;
+      /* مسافة من الأسفل */
+      color: white;
+      font-size: 12px;
+      padding: 10px 14px;
+      border-radius: 50%;
+      text-align: center;
+      text-decoration: none;
+      display: none;
+      /* مخفية بالافتراضي */
+      z-index: 1000;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .back-to-top:hover {
+      transform: translateY(-2px);
+    }
+
+    @media screen and (max-width: 768px) {
+      .back-to-top {
+        font-size: 20px;
+        padding: 10px 14px;
+        left: 15px;
+        /* ضبط للموبايل */
+        bottom: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV خاص بصفحة البحث: يحتوي على اللوغو في اليمين وشريط البحث في بقية المساحة -->
+  <nav class="navbar shadow-sm search-nav bg-light py-3">
+    <div class="container-fluid d-flex align-items-center justify-content-between bg-light">
+      <!-- الجزء الخاص بشريط البحث: يمتد ليملأ المساحة المتاحة -->
+      <div class="d-flex flex-grow-1 align-items-center nav-search-row" style="gap: .75rem;">
+        <!-- شريط البحث: يستخدم flex-grow ليأخذ كل المساحة المتاحة -->
+        <form class="d-flex align-items-center flex-grow-1 bg-light" method="get" role="search">
+          <input name="q" id="q" class="form-control search-input flex-grow-1 me-2" type="search"
+            placeholder="البحث في المتجر..." aria-label="بحث" value="{{ query | default('') }}" autofocus>
+          <button class="btn btn-outline-primary search-btn me-1" type="submit">بحث</button>
+        </form>
+        <a class="navbar-brand ms-2" href="{{ url_for('store.index') }}">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="height:40px; width:auto;">
+        </a>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- محتوى الصفحة: صندوق النتائج -->
+  <main class="container py-4">
+    <h1 class="h4 mb-3">نتائج البحث عن: <span class="text-primary">{{ query | default('') }}</span></h1>
+
+    <!-- مثال استخدام شرط Jinja لعرض نتائج أو رسالة لا توجد نتائج -->
+    {% if query and results and results|length > 0 %}
+    {# نتوقع أن يكون "results" قائمة من قواميس/كائنات. سنعرض أربعة عناصر ثابتة لو أردت #}
+    {% for item in results %}
+    {% set modal_id = "productModal-" ~ (loop.index) %}
+
+    <div class="modal fade" id="{{modal_id}}" tabindex="-1" aria-labelledby="{{modal_id}}Title" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="{{modal_id}}Title">{{ item["name"] }}</h1>
+          </div>
+          <div class="modal-body">
+            <p class="text-dark">{{item["details"]}}</p>
+            <h6 class="text-primary">{{item["price"]}} دولار</h6>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            <form action="{{ url_for('store.add_to_cart', product_id= item['product_id'] ) }}" method="post">
+              <button type="submit" class="btn btn-primary">أضف للسلة</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row align-items-center py-3 border border-2 rounded-3">
+      <!-- Product image (right side) -->
+      <div class="col-auto">
+        <img src="{{ url_for('static', filename=item['image_url']) }}" alt="{{ item.product_name }}"
+          class="img-fluid rounded" style="width: 64px; height: 64px; object-fit: cover;">
+      </div>
+
+      <!-- Product name and price (middle) -->
+      <div class="col mb-2">
+        <div class="fw-semibold">{{ item.name }}</div>
+        <div class="text-primary small">{{ item.price }} دولار</div>
+      </div>
+
+      <div class="col-auto">
+        <a href="" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#{{modal_id}}">عرض المنتج</a>
+      </div>
+
+    </div>
+    {% endfor %}
+    </div>
+    {% elif results is none %}
+    <p></p>
+    {% else %}
+    <div class="alert alert-warning">لا توجد نتائج للبحث.</div>
+    {% endif %}
+
+
+  </main>
+
+  <!-- رسائل Flash -->
+  <div class="flash-container">
+    {% for message in get_flashed_messages() %}
+    <div class="flash-message" data-auto-close="5000">
+      <div class="flash-content">
+        <span class="flash-text">{{ message }}</span>
+      </div>
+      <div class="flash-progress"></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <a href="#" class="back-to-top" id="backToTop">
+    <img src="{{ url_for('static', filename='icons/arrow-up-square.svg') }}" alt="arrow-up-square.svg" height="40px"
+      width="40px">
+  </a>
+
+  <!-- back to top -->
+  <script>
+    const backToTopButton = document.getElementById("backToTop");
+
+    // إظهار الزر عند التمرير أكثر من 100px
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 100) {
+        backToTopButton.style.display = "block";
+      } else {
+        backToTopButton.style.display = "none";
+      }
+    });
+
+    // عند الضغط، صعود للصفحة بسلاسة
+    backToTopButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
+  </script>
+
+  <script>
+    (function () {
+      // مدة العرض (بـ ms) — اجعلها مساوية لمدة أنيميشن progressBar (هنا 5000)
+      var DISPLAY_MS = 5000;
+      // مدة انزلاق الخروج (مطابقة ل slideOutRight 0.5s)
+      var SLIDE_OUT_MS = 500;
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var flashes = document.querySelectorAll('.flash-container .flash-message');
+        flashes.forEach(function (flash) {
+          // اضف حدث اغلاق بنقرة (اختياري)
+          flash.addEventListener('click', function () {
+            hideAndRemove(flash);
+          });
+
+          // ابدأ عدّ المدة (يمكنك التأخير قليلاً لو أردت)
+          setTimeout(function () {
+            hideAndRemove(flash);
+          }, DISPLAY_MS);
+        });
+
+        function hideAndRemove(el) {
+          if (!el) return;
+          // إذا كانت مخفية مسبقاً نمنع التكرار
+          if (el.classList.contains('hide')) return;
+          el.classList.add('hide'); // هذا يشغّل slideOutRight
+          // ازل العنصر بعد انتهاء انيميشن الخروج
+          setTimeout(function () {
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+          }, SLIDE_OUT_MS + 50);
+        }
+      });
+    })();
+  </script>
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+</body>
+
+</html>

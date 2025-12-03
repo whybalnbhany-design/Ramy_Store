@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تعديل منتج - رامي ستور</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <style>
+    body {
+      background: #f8f9fa;
+    }
+
+    .card {
+      border-radius: 12px;
+    }
+
+    .form-note {
+      font-size: .9rem;
+      color: #6c757d;
+    }
+
+    .img-preview {
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px dashed #ced4da;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container py-4">
+    <!-- Header / Breadcrumb -->
+    <div class="d-flex justify-content-center mb-4">
+      <div class="text-center p-3 rounded-3 shadow-sm w-100 border" style="max-width: 600px; background: #FFFFFF;">
+        <h2 class="fw-bold mb-1 text-success">
+          تعديل منتج
+        </h2>
+        <p class="text-secondary fs-6 mb-0">
+          حدّث تفاصيل المنتج أو اترك الحقول كما هي. احفظ التغييرات عند الانتهاء.
+        </p>
+      </div>
+    </div>
+
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow-sm p-3">
+          <div class="card-body">
+            <form method="post" enctype="multipart/form-data" novalidate>
+
+
+              <!-- اسم المنتج -->
+              <div class="mb-3">
+                <label class="form-label">اسم المنتج <span class="text-danger">*</span></label>
+                <input type="text" name="name" value="{{ request.form['name'] or product['name'] }}"
+                  class="form-control" placeholder="مثال: سماعة بلوتوث" required>
+                <div class="invalid-feedback">الرجاء إدخال اسم المنتج.</div>
+              </div>
+
+              <!-- السعر  -->
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <label class="form-label">السعر (دولار) <span class="text-danger">*</span></label>
+                  <input type="number" step="0.01" name="price" value="{{ request.form['price'] or product['price'] }}"
+                    class="form-control" placeholder="مثال: 199.99" required>
+                  <div class="invalid-feedback">الرجاء إدخال السعر.</div>
+                </div>
+
+                <!-- الفئة والحالة -->
+                <div class="col-6">
+                  <label class="form-label">الفئة <span class="text-danger">*</span></label>
+                  <select name="category" class="form-select" required>
+                    <option value="">اختر فئة</option>
+
+                    <option value="furniture" {{ 'selected' if (request.form['category'] or
+                      product['category'])=='furniture' else '' }}>
+                      الاثاث
+                    </option>
+
+                    <option value="mobile_phones" {{ 'selected' if (request.form['category'] or
+                      product['category'])=='mobile_phones' else '' }}>
+                      الجوالات
+                    </option>
+
+                    <option value="home_essentials" {{ 'selected' if (request.form['category'] or
+                      product['category'])=='home_essentials' else '' }}>
+                      مستلزمات المنزل
+                    </option>
+
+                    <option value="perfumes" {{ 'selected' if (request.form['category'] or
+                      product['category'])=='perfumes' else '' }}>
+                      العطور
+                    </option>
+
+                    <option value="books" {{ 'selected' if (request.form['category'] or product['category'])=='books'
+                      else '' }}>
+                      الكتب
+                    </option>
+
+                    <option value="medical_devices" {{ 'selected' if (request.form['category'] or
+                      product['category'])=='medical_devices' else '' }}>
+                      الاجهزة الطبية
+                    </option>
+
+                    <option value="toys" {{ 'selected' if (request.form['category'] or product['category'])=='toys'
+                      else '' }}>
+                      العاب الاطفال
+                    </option>
+
+                    <option value="electronics" {{ 'selected' if (request.form['category'] or
+                      product['category'])=='electronics' else '' }}>
+                      الالكترونيات
+                    </option>
+                  </select>
+
+                  <div class="invalid-feedback">الرجاء اختيار فئة.</div>
+                </div>
+
+              </div>
+
+              <!-- الوصف -->
+              <div class="mb-3">
+                <label class="form-label">الوصف</label>
+                <textarea name="description" class="form-control" rows="5"
+                  placeholder="أضف وصفًا موجزًا للمنتج">{{ request.form['description'] or product['details'] }}</textarea>
+              </div>
+
+              <!-- صورة المنتج -->
+              <div class="mb-3">
+                <label class="form-label">صورة المنتج</label>
+
+                <div class="d-flex align-items-center gap-3">
+
+                  <!-- معاينة الصورة -->
+                  <div>
+                    <img id="imgPreview" class="img-preview" src="{{ url_for('static', filename=product.image_url) }}"
+                      alt="معاينة الصورة"
+                      style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
+                  </div>
+
+                  <!-- زر رفع الصورة -->
+                  <div class="flex-fill">
+
+                    <label for="imageInput" class="btn btn-success w-100">
+                      تغيير الصورة
+                    </label>
+
+                    <!-- input مخفي -->
+                    <input type="file" name="image" id="imageInput" accept="image/*" style="display:none;">
+
+                    <small id="fileName" class="text-muted d-block mt-2">اتركه كما هو للاحتفاظ بالصورة الحالية</small>
+                  </div>
+
+                </div>
+              </div>
+
+
+              <!-- ملاحظات / أخطاء عامة -->
+              {% if errors %}
+              <div class="alert alert-danger">{{ errors }}</div>
+              {% endif %}
+
+              <!-- أزرار -->
+              <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary"> العودة</a>
+                <button type="submit" class="btn btn-success"> حفظ التغييرات</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- رسائل Flash -->
+  <div class="flash-container">
+    {% for message in get_flashed_messages() %}
+    <div class="flash-message" data-auto-close="5000">
+      <div class="flash-content">
+        <span class="flash-text">{{ message }}</span>
+      </div>
+      <div class="flash-progress"></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+  <script>
+    document.getElementById('imageInput').addEventListener('change', function () {
+      const file = this.files[0];
+
+      // تحديث اسم الملف
+      document.getElementById('fileName').textContent = file ? file.name : 'لم يتم اختيار أي صورة';
+
+      // معاينة الصورة
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          document.getElementById('imgPreview').src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+
+  <script>
+    // معاينة الصورة قبل الرفع
+    (function () {
+      var input = document.getElementById('imageInput');
+      var preview = document.getElementById('imgPreview');
+      if (!input || !preview) return;
+      input.addEventListener('change', function (e) {
+        var file = this.files && this.files[0];
+        if (!file) {
+          preview.src = "{{ url_for('static', filename='images/placeholder.png') }}";
+          return;
+        }
+        if (!file.type.startsWith('image/')) {
+          alert('الملف المختار ليس صورة.');
+          this.value = '';
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (ev) { preview.src = ev.target.result; };
+        reader.readAsDataURL(file);
+      });
+    })();
+
+    // تفعيل فحص بساطة للـ form (Bootstrap validation)
+    (function () {
+      var forms = document.querySelectorAll('form');
+      Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+            form.classList.add('was-validated');
+          }
+        }, false);
+      });
+    })();
+  </script>
+</body>
+
+</html>

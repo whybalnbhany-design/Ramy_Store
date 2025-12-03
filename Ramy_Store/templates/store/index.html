@@ -1,0 +1,535 @@
+{% extends 'base.html' %}
+{% block title %}متجر رامي ستور{% endblock %}
+{% block style %}
+<style>
+  .hero-section {
+    /* ضع رابط صورتك هنا */
+    background-image: url("{{ url_for('static', filename='images/HeroImage.png') }}");
+    /* تغطي كل مساحة القسم */
+    background-size: cover;
+    /* الجزء المهم في الوسط */
+    background-position: center;
+    width: 100%;
+    /* ارتفاع القسم 80% من الشاشة */
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    position: relative;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* طبقة شفافة لتوضيح النص */
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  @media (max-width: 768px) {
+    .hero-section {
+      /* تقليل ارتفاع الهواتف */
+      height: 60vh;
+    }
+  }
+.card-text {
+    display: -webkit-box;
+    line-clamp: 3; /* عدد الأسطر المراد عرضها */
+    -webkit-line-clamp: 3; /* عدد الأسطر المراد عرضها */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.flash-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 400px;
+}
+
+.flash-message {
+    background: linear-gradient(135deg, #005d66 0%, #008c96 100%);
+    color: #ffffff;
+    padding: 0;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    overflow: hidden;
+    animation: slideInRight 0.5s ease-out;
+    position: relative;
+}
+
+
+.flash-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+}
+
+.flash-text {
+    flex: 1;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.flash-progress {
+    height: 3px;
+    background: rgba(255,255,255,0.5);
+    width: 100%;
+    transform-origin: left;
+    animation: progressBar 5s linear forwards;
+}
+
+/* Animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes progressBar {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+
+.flash-message.hide {
+    animation: slideOutRight 0.5s ease-in forwards;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flash-container {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}
+</style>
+
+<style>
+  /* القسم كامل ليظهر كمنطقة بارزة */
+  .categories-section {
+    background: linear-gradient(180deg, rgba(0, 93, 102, 0.03), rgba(0, 93, 102, 0.02));
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    /* عنوان واضح وكبير */
+    font-weight: 700;
+    color: #003f41;
+    letter-spacing: .3px;
+  }
+
+  /* بطاقات أكبر وواضحة */
+  .category-card {
+    border: none;
+    border-radius: 1rem;
+    transition: transform .25s ease, box-shadow .25s ease;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .category-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  /* غلاف الصورة داخل البطاقة: يحافظ على نسبة ويُظهر الصورة كوِفر */
+  .category-img-wrapper {
+    width: 100%;
+    height: 230px;
+    /* ارتفاع افتراضي للحاسوب */
+    overflow: hidden;
+  }
+
+  .category-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .4s ease;
+  }
+
+  .category-card:hover .category-img {
+    transform: scale(1.05);
+  }
+
+  .category-title {
+    font-size: 1.05rem;
+    color: #042f30;
+    padding: .6rem 0;
+  }
+
+  /* Responsive: ارتفاع أصغر على الشاشات الصغيرة ليتناسب مع العرض */
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 1.6rem;
+    }
+
+    .category-img-wrapper {
+      height: 160px;
+    }
+
+    .category-title {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .category-img-wrapper {
+      height: 140px;
+    }
+
+    .section-title {
+      font-size: 1.45rem;
+      margin-bottom: 1rem;
+    }
+  }
+
+/* شارة الخصم الحمراء */
+.discount-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #dc3545; /* أحمر بوتستراب */
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 4px 6px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+/* السعر قبل التخفيض بخط مشطوب وباهت */
+.price-old {
+  text-decoration: line-through;
+  color: #6c757d; /* muted */
+  font-size: 0.95rem;
+}
+
+/* السعر الحالي بارز */
+.price-current {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #FF0000; /* bootstrap primary */
+}
+</style>
+
+{% endblock %}
+
+
+{% block body %}
+<section class="hero-section">
+  <div class="hero-overlay"></div>
+  <div class="hero-content container">
+    <h1 class="display-4 fw-bold ">مرحبا بك في رامي ستور</h1>
+    <p class="lead mb-4">وجهتك الأولى لكل ما تحتاجه بجودة وأسعار تنافسية</p>
+    <a href="#special-offers" class="btn btn-danger btn-lg me-2">تسوق الآن</a>
+    <a href="{{ url_for('admin.index') }}" class="btn btn-outline-light btn-lg">إدارة المتجر</a>
+  </div>
+</section>
+
+<div class="section-divider">
+  <svg viewBox="0 0 1440 100">
+    <path fill="#ffffff" d="M0,0 L1440,0 L1440,100 L0,100 Z"></path>
+  </svg>
+</div>
+
+{# العروض العشوائيه #}
+<section id="special-offers" class="py-5 bg-light">
+<div class="container">
+    <h2 class="text-center mb-5 section-title">العروض</h2>
+  <div class="row justify-content-start mb-5">
+
+    {% set discounts = [10,20,30,40,50,60,70,80,90] %}
+
+    {% for p in random_products %}
+      {% set modal_id = "productModal-" ~ (loop.index) %}
+      {# اختر نسبة خصم عشوائية لكل منتج #}
+      {% set discount = discounts|random %}
+      {# احسب السعر قبل التخفيض بزيادة نسبة الخصم على السعر الموجود في DB #}
+      {% set price_current = p["price"] %}
+      {% set price_before = (price_current * (1 + (discount / 100.0)))|round(0, 'common') %}
+
+      <div class="modal fade" id="{{ modal_id }}" tabindex="-1" aria-labelledby="{{ modal_id }}Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="{{ modal_id }}Title">{{ p["name"] }}</h1>
+            </div>
+            <div class="modal-body">
+              <p class="text-dark">{{ p["details"] }}</p>
+              <div class="mb-2">
+                <div class="d-flex align-items-baseline gap-2">
+                  <div class="price-current">{{ price_current }} دولار</div>
+                  <div class="price-old">{{ price_before }} دولار</div>
+                </div>
+                <small class="text-muted">الخصم: {{ discount }}%</small>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+              <form action="{{ url_for('store.add_to_cart', product_id= p['product_id'] ) }}" method="post">
+                <button type="submit" class="btn btn-danger">أضف للسلة</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- عنصر الشبكة -->
+      <div class="col-12 col-sm-6 col-md-4 col-lg-4 my-3">
+        <div class="card h-100 position-relative">
+          {# شارة الخصم في الزاوية اليمنى العليا #}
+          <div class="discount-badge">{{ discount }}%</div>
+
+          <div class="ratio ratio-1x1">
+            <img src="{{ url_for('static', filename=p['image_url']) }}" 
+                  class="card-img-top img-fluid" alt="product_image">
+          </div>
+
+          <div class="card-body d-flex flex-column">
+            <h4 class="card-title">{{ p["name"] }}</h4>
+
+            <div class="mb-2">
+              <div class="d-flex align-items-baseline gap-2">
+                <div class="price-current">{{ price_current }} دولار</div>
+                <div class="price-old">{{ price_before }} دولار</div>
+              </div>
+            </div>
+
+            <p class="card-text">{{ p["details"] }}</p>
+
+            <div class="mt-auto">
+              <div class="row mb-2 align-items-center">
+                <button type="button" class="btn btn-outline-danger col-6" 
+                        data-bs-toggle="modal" data-bs-target="#{{ modal_id }}">
+                  التفاصيل
+                </button>
+
+                <form action="{{ url_for('store.add_to_cart', product_id= p['product_id'] ) }}" method="post" class="col-6 ps-2">
+                  <button type="submit" class="btn btn-danger w-100">أضف للسلة</button>
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    {% endfor %}
+
+  </div>
+</div>
+</section>
+
+<div class="section-divider">
+  <svg viewBox="0 0 1440 100">
+    <path fill="#ffffff" d="M0,0 L1440,0 L1440,100 L0,100 Z"></path>
+  </svg>
+</div>
+
+<section id="categories" class="py-5 categories-section">
+  <div class="container-fluid">
+    <h2 class="text-center mb-4 section-title">قائمة الفئات</h2>
+
+    <div class="row g-4 justify-content-center align-items-stretch">
+
+      <!-- الأثاث -->
+      <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+        <a href="{{ url_for('categories.furniture') }}" class="text-decoration-none d-block h-100">
+          <div class="card category-card h-100 shadow-sm overflow-hidden">
+            <div class="category-img-wrapper">
+              <img src="{{ url_for('static', filename='images/images_of_categories/furniture.png') }}"
+                class="card-img-top category-img" alt="الاثاث" loading="lazy">
+            </div>
+            <div class="card-body text-center">
+              <h3 class="card-title mb-0 category-title">الاثاث</h3>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- الجوالات -->
+      <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+        <a href="{{ url_for('categories.mobile_phones') }}" class="text-decoration-none d-block h-100">
+          <div class="card category-card h-100 shadow-sm overflow-hidden">
+            <div class="category-img-wrapper">
+              <img src="{{ url_for('static', filename='images/images_of_categories/mobile_phones.png') }}"
+                class="card-img-top category-img" alt="الجوالات" loading="lazy">
+            </div>
+            <div class="card-body text-center">
+              <h3 class="card-title mb-0 category-title">الجوالات</h3>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- مستلزمات المنزل -->
+      <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+        <a href="{{ url_for('categories.home_essentials') }}" class="text-decoration-none d-block h-100">
+          <div class="card category-card h-100 shadow-sm overflow-hidden">
+            <div class="category-img-wrapper">
+              <img src="{{ url_for('static', filename='images/images_of_categories/home_essentials.png') }}"
+                class="card-img-top category-img" alt="مستلزمات المنزل" loading="lazy">
+            </div>
+            <div class="card-body text-center">
+              <h3 class="card-title mb-0 category-title">مستلزمات المنزل</h3>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- العطور -->
+      <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+        <a href="{{ url_for('categories.perfumes') }}" class="text-decoration-none d-block h-100">
+          <div class="card category-card h-100 shadow-sm overflow-hidden">
+            <div class="category-img-wrapper">
+              <img src="{{ url_for('static', filename='images/images_of_categories/perfumes.png') }}"
+                class="card-img-top category-img" alt="العطور" loading="lazy">
+            </div>
+            <div class="card-body text-center">
+              <h3 class="card-title mb-0 category-title">العطور</h3>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- الكتب -->
+      <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+        <a href="{{ url_for('categories.books') }}" class="text-decoration-none d-block h-100">
+          <div class="card category-card h-100 shadow-sm overflow-hidden">
+            <div class="category-img-wrapper">
+              <img src="{{ url_for('static', filename='images/images_of_categories/books.jpg') }}"
+                class="card-img-top category-img" alt="الكتب" loading="lazy">
+            </div>
+            <div class="card-body text-center">
+              <h3 class="card-title mb-0 category-title">الكتب</h3>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- الأجهزة الطبية -->
+      <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+        <a href="{{ url_for('categories.medical_devices') }}" class="text-decoration-none d-block h-100">
+          <div class="card category-card h-100 shadow-sm overflow-hidden">
+            <div class="category-img-wrapper">
+              <img src="{{ url_for('static', filename='images/images_of_categories/medical_devices.png') }}"
+                class="card-img-top category-img" alt="الأجهزة الطبية" loading="lazy">
+            </div>
+            <div class="card-body text-center">
+              <h3 class="card-title mb-0 category-title">الأجهزة الطبية</h3>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- ألعاب الأطفال -->
+      <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+        <a href="{{ url_for('categories.toys') }}" class="text-decoration-none d-block h-100">
+          <div class="card category-card h-100 shadow-sm overflow-hidden">
+            <div class="category-img-wrapper">
+              <img src="{{ url_for('static', filename='images/images_of_categories/toys.png') }}"
+                class="card-img-top category-img" alt="العاب الاطفال" loading="lazy">
+            </div>
+            <div class="card-body text-center">
+              <h3 class="card-title mb-0 category-title">العاب الاطفال</h3>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- الإلكترونيات -->
+      <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+        <a href="{{ url_for('categories.electronics') }}" class="text-decoration-none d-block h-100">
+          <div class="card category-card h-100 shadow-sm overflow-hidden">
+            <div class="category-img-wrapper">
+              <img src="{{ url_for('static', filename='images/images_of_categories/electronics.png') }}"
+                class="card-img-top category-img" alt="الالكترونيات" loading="lazy">
+            </div>
+            <div class="card-body text-center">
+              <h3 class="card-title mb-0 category-title">الالكترونيات</h3>
+            </div>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<script>
+  (function(){
+    // مدة العرض (بـ ms) — اجعلها مساوية لمدة أنيميشن progressBar (هنا 5000)
+    var DISPLAY_MS = 5000;
+    // مدة انزلاق الخروج (مطابقة ل slideOutRight 0.5s)
+    var SLIDE_OUT_MS = 500;
+
+    document.addEventListener('DOMContentLoaded', function(){
+      var flashes = document.querySelectorAll('.flash-container .flash-message');
+      flashes.forEach(function(flash){
+        // اضف حدث اغلاق بنقرة (اختياري)
+        flash.addEventListener('click', function(){
+          hideAndRemove(flash);
+        });
+
+        // ابدأ عدّ المدة (يمكنك التأخير قليلاً لو أردت)
+        setTimeout(function(){
+          hideAndRemove(flash);
+        }, DISPLAY_MS);
+      });
+
+      function hideAndRemove(el){
+        if (!el) return;
+        // إذا كانت مخفية مسبقاً نمنع التكرار
+        if (el.classList.contains('hide')) return;
+        el.classList.add('hide'); // هذا يشغّل slideOutRight
+        // ازل العنصر بعد انتهاء انيميشن الخروج
+        setTimeout(function(){
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        }, SLIDE_OUT_MS + 50);
+      }
+    });
+  })();
+</script>
+
+
+{% endblock %}

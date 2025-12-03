@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.min.css') }}">
+
+  {% block style %}{% endblock %}
+  <style>
+    .back-to-top {
+      position: fixed;
+      left: 20px;
+      /* وضعها في اليسار */
+      bottom: 30px;
+      /* مسافة من الأسفل */
+      color: white;
+      font-size: 12px;
+      padding: 10px 14px;
+      border-radius: 50%;
+      text-align: center;
+      text-decoration: none;
+      display: none;
+      /* مخفية بالافتراضي */
+      z-index: 1000;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .back-to-top:hover {
+      transform: translateY(-2px);
+    }
+
+    @media screen and (max-width: 768px) {
+      .back-to-top {
+        font-size: 20px;
+        padding: 10px 14px;
+        left: 15px;
+        /* ضبط للموبايل */
+        bottom: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+  {% if g.user %}
+  <!-- navbar after login -->
+  <nav class="navbar navbar-expand bg-light border-bottom" aria-label="navbar">
+    <div class="container-fluid p-0 mt-1">
+      <a class="navbar-brand " href="{{ url_for('store.index') }}">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="height:40px; width:auto;">
+      </a>
+      <ul class="navbar-nav mb-1 align-items-center">
+        <!-- أيقونة البحث -->
+        <a href="{{ url_for('store.search') }}" class="btn ms-2 " style="border:none; background:none;">
+          <img src="{{ url_for('static', filename='icons/search.svg') }}" alt="search" width="28" height="28">
+        </a>
+        <a href="{{ url_for('store.cart') }}">
+          <img src="{{ url_for('static', filename='icons/cart-plus.svg') }}" alt="cart-icon" width="32" height="32"
+            title="السلة الخاصة بك">
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger rounded-3 text-nowrap ms-2 me-3" style=" color: #ffffff; border: none; 
+            padding: 7px 14px; font-size: 0.95rem; height: 38px;">تسجيل الخروج</a>
+      </ul>
+    </div>
+  </nav>
+
+  {% else %}
+  <!-- navbar before login -->
+  <nav class="navbar navbar-expand bg-light" aria-label="navbar">
+    <div class="container-fluid p-0 mt-1">
+      <a class="navbar-brand" href="{{ url_for('store.index') }}">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="height:40px; width:auto;">
+      </a>
+      <ul class="navbar-nav mb-1">
+        <!-- أيقونة البحث -->
+        <a href="{{ url_for('store.search') }}" class="btn px-0" style="border:none; background:none;">
+          <img src="{{ url_for('static', filename='icons/search.svg') }}" alt="search" width="28" height="28"
+            class="pb-1">
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="btn rounded-3 ms-1 me-2 text-nowrap" style="color: #0aa3c2; border-color: #0aa3c2;
+          padding: 6px 6px; font-size: 0.95rem; height: 38px;">تسجيل الدخول</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary rounded-3 text-nowrap ms-1" style="background-color:	#0aa3c2; color: #ffffff; border: none; 
+          padding: 7px 7px; font-size: 0.95rem; height: 38px;">انشاء حساب جديد</a>
+      </ul>
+    </div>
+  </nav>
+  {% endif %}
+
+  <!-- navbar for links of categories -->
+  <nav class="navbar navbar-expand border-bottom mb-3" aria-label="Second navbar example">
+    <ul class="navbar-nav p-0 justify-content-center ">
+      <li class="nav-item"><a class="nav-link active text-nowrap fz-6 " style="color:#005d66"
+          href="{{ url_for('categories.furniture') }}">الاثاث</a></li>
+      <li class="nav-item"><a class="nav-link active text-nowrap fz-6 " style="color:#005d66"
+          href="{{ url_for('categories.mobile_phones') }}">الجوالات</a></li>
+      <li class="nav-item"><a class="nav-link active text-nowrap fz-6 " style="color:#005d66"
+          href="{{ url_for('categories.home_essentials') }}">مستلزمات
+          المنزل</a></li>
+      <li class="nav-item"><a class="nav-link active text-nowrap fz-6 " style="color:#005d66"
+          href="{{ url_for('categories.perfumes') }}">العطور</a></li>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle active" href="#" data-bs-toggle="dropdown" style="color:#005d66"
+          aria-expanded="false">المزيد</a>
+        <ul class="dropdown-menu">
+      </li>
+      <li><a class="dropdown-item" style="color:#005d66; background-color: transparent;"
+          href="{{ url_for('categories.books') }}">الكتب</a></li>
+      <li><a class="dropdown-item" style="color:#005d66; background-color: transparent;"
+          href="{{ url_for('categories.medical_devices') }}">الاجهزة الطبية</a>
+      </li>
+      <li><a class="dropdown-item" style="color:#005d66; background-color: transparent;"
+          href="{{ url_for('categories.toys') }}">العاب الاطفال</a></li>
+      <li><a class="dropdown-item" style="color:#005d66; background-color: transparent;"
+          href="{{ url_for('categories.electronics') }}">الالكترونيات</a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- رسائل Flash -->
+  <div class="flash-container">
+    {% for message in get_flashed_messages() %}
+    <div class="flash-message" data-auto-close="5000">
+      <div class="flash-content">
+        <span class="flash-text">{{ message }}</span>
+      </div>
+      <div class="flash-progress"></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <a href="#" class="back-to-top" id="backToTop">
+    <img src="{{ url_for('static', filename='icons/arrow-up-square.svg') }}" alt="arrow-up-square.svg" height="40px"
+      width="40px">
+  </a>
+  {% block body %}{% endblock %}
+
+
+
+  <!-- 
+  =======================
+  FOOTER
+  ======================= -->
+  <footer class="bg-dark text-white pt-5 pb-4 ">
+    <div class="container">
+      <div class="row">
+
+        <!-- عمود 1: معلومات المتجر -->
+        <div class="col-12 col-md-4 mb-4 text-center text-md-end">
+          <h5 class="fw-bold mb-3">رامي ستور</h5>
+          <p>وجهتك الأولى لكل ما تحتاجه بجودة وأسعار تنافسية.</p>
+          <p> جميع الحقوق محفوظة © 2025 Ramy Store</p>
+        </div>
+
+        <!-- عمود 2: روابط سريعة -->
+        <div class="col-12 col-md-4 mb-4">
+          <h5 class="fw-bold mb-3">روابط سريعة</h5>
+          <ul class="list-unstyled">
+            <li><a href="https://drive.google.com/file/d/11FveYDZSwt6VYCuVD7-ek9VjJrTYm7HS/view" class="text-white text-decoration-none">شرح الموقع</a></li>
+            <li><a href="{{ url_for('admin.index') }}" class="text-white text-decoration-none">إدارة المتجر</a></li>
+            <li><a href="{{ url_for('store.index') }}#special-offers" class="text-white text-decoration-none">العروض
+                </a></li>
+            <li><a href="{{ url_for('store.index') }}#categories" class="text-white text-decoration-none">قائمة
+                الفئات</a></li>
+          </ul>
+        </div>
+
+        <!-- عمود 3: وسائل التواصل الاجتماعي -->
+        <div class="col-12 col-md-4 mb-4">
+          <h5 class="fw-bold mb-3">تابعنا</h5>
+          <p>ابقى على تواصل معنا عبر منصات التواصل الاجتماعي:</p>
+          <a href="https://linkedin.com" target="_blank" class="me-3"
+            style="text-decoration:none!important; border:none!important; outline:none!important; box-shadow:none!important;">
+            <img src="{{ url_for('static', filename='icons/linkedin.svg') }}" alt="Linkedin" width="30">
+          </a>
+          <a href="https://youtube.com" target="_blank" class="me-3"
+            style="text-decoration:none!important; border:none!important; outline:none!important; box-shadow:none!important;">
+            <img src="{{ url_for('static', filename='icons/youtube.svg') }}" alt="YouTube" width="30">
+          </a>
+          <a href="https://twitter.com" target="_blank" class="me-3"
+            style="text-decoration:none!important; border:none!important; outline:none!important; box-shadow:none!important;">
+            <img src="{{ url_for('static', filename='icons/twitter-x.svg') }}" alt="Twitter" width="30">
+          </a>
+          <a href="https://facebook.com" target="_blank" class="me-3"
+            style="text-decoration:none!important; border:none!important; outline:none!important; box-shadow:none!important;">
+            <img src="{{ url_for('static', filename='icons/facebook.svg') }}" alt="Facebook" width="30">
+          </a>
+        </div>
+
+      </div>
+
+      <!-- خط فاصل -->
+      <hr class="border-light">
+
+      <!-- أسفل الفوتر -->
+      <div class="row">
+        <div class="col text-center">
+          <p class="mb-0 small">تم تصميم الموقع بواسطة&nbsp<span class="fw-bold">رامي وهيب </span></p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+  <!-- back to top -->
+  <script>
+    const backToTopButton = document.getElementById("backToTop");
+
+    // إظهار الزر عند التمرير أكثر من 100px
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 100) {
+        backToTopButton.style.display = "block";
+      } else {
+        backToTopButton.style.display = "none";
+      }
+    });
+
+    // عند الضغط، صعود للصفحة بسلاسة
+    backToTopButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
+  </script>
+</body>
+
+</html>

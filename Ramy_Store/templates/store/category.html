@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% block title %}متجر رامي ستور{% endblock %}
+{% block style %}
+<style>
+  .card-text {
+    display: -webkit-box;
+    line-clamp: 3;
+    /* عدد الأسطر المراد عرضها */
+    -webkit-line-clamp: 3;
+    /* عدد الأسطر المراد عرضها */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .flash-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 400px;
+  }
+
+  .flash-message {
+    background: linear-gradient(135deg, #005d66 0%, #008c96 100%);
+    color: #ffffff;
+    padding: 0;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: slideInRight 0.5s ease-out;
+    position: relative;
+  }
+
+
+  .flash-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+  }
+
+  .flash-text {
+    flex: 1;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .flash-progress {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.5);
+    width: 100%;
+    transform-origin: left;
+    animation: progressBar 5s linear forwards;
+  }
+
+  /* Animations */
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutRight {
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes progressBar {
+    from {
+      transform: scaleX(1);
+    }
+
+    to {
+      transform: scaleX(0);
+    }
+  }
+
+  .flash-message.hide {
+    animation: slideOutRight 0.5s ease-in forwards;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .flash-container {
+      left: 20px;
+      right: 20px;
+      max-width: none;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+  <div class="row justify-content-start mb-5">
+
+    {% for p in products %}
+    {% set modal_id = "productModal-" ~ (loop.index) %}
+    <div class="modal fade" id="{{modal_id}}" tabindex="-1" aria-labelledby="{{modal_id}}Title" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="{{modal_id}}Title">{{ p["name"] }}</h1>
+          </div>
+          <div class="modal-body">
+            <p class="text-dark">{{p["details"]}}</p>
+            <h6 class="text-primary">{{p["price"]}} دولار</h6>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            <form action="{{ url_for('store.add_to_cart', product_id= p['product_id'] ) }}" method="post">
+              <button type="submit" class="btn btn-primary">أضف للسلة</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- عنصر الشبكة -->
+    <div class="col-12 col-sm-6 col-md-4 col-lg-4 my-3">
+      <div class="card h-100">
+        <div class="ratio ratio-1x1">
+          <img src="{{ url_for('static', filename=p['image_url']) }}" class="card-img-top img-fluid"
+            alt="product_image">
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h4 class="card-title">{{ p["name"] }}</h4>
+          <h6 class="text-primary mb-2">{{p["price"]}} دولار</h6>
+          <p class="card-text">{{p["details"]}}</p>
+
+          <div class="mt-auto">
+            <button type="button" class="btn btn-outline-primary w-100 mb-2" data-bs-toggle="modal"
+              data-bs-target="#{{modal_id}}">
+              التفاصيل
+            </button>
+            <form action="{{ url_for('store.add_to_cart', product_id= p['product_id'] ) }}" method="post">
+              <button type="submit" class="btn btn-primary w-100">أضف للسلة</button>
+            </form>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    {% endfor %}
+
+  </div>
+</div>
+
+<script>
+  (function () {
+    // مدة العرض (بـ ms) — اجعلها مساوية لمدة أنيميشن progressBar (هنا 5000)
+    var DISPLAY_MS = 5000;
+    // مدة انزلاق الخروج (مطابقة ل slideOutRight 0.5s)
+    var SLIDE_OUT_MS = 500;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var flashes = document.querySelectorAll('.flash-container .flash-message');
+      flashes.forEach(function (flash) {
+        // اضف حدث اغلاق بنقرة (اختياري)
+        flash.addEventListener('click', function () {
+          hideAndRemove(flash);
+        });
+
+        // ابدأ عدّ المدة (يمكنك التأخير قليلاً لو أردت)
+        setTimeout(function () {
+          hideAndRemove(flash);
+        }, DISPLAY_MS);
+      });
+
+      function hideAndRemove(el) {
+        if (!el) return;
+        // إذا كانت مخفية مسبقاً نمنع التكرار
+        if (el.classList.contains('hide')) return;
+        el.classList.add('hide'); // هذا يشغّل slideOutRight
+        // ازل العنصر بعد انتهاء انيميشن الخروج
+        setTimeout(function () {
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        }, SLIDE_OUT_MS + 50);
+      }
+    });
+  })();
+</script>
+
+{% endblock %}

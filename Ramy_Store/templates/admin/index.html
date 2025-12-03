@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>إدارة المتجر - رامي ستور</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <style>
+        .flash-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+        }
+
+        .flash-message {
+            background: linear-gradient(135deg, #005d66 0%, #008c96 100%);
+            color: #ffffff;
+            padding: 0;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            animation: slideInRight 0.5s ease-out;
+            position: relative;
+        }
+
+
+        .flash-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+        }
+
+        .flash-text {
+            flex: 1;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .flash-progress {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.5);
+            width: 100%;
+            transform-origin: left;
+            animation: progressBar 5s linear forwards;
+        }
+
+        /* Animations */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes progressBar {
+            from {
+                transform: scaleX(1);
+            }
+
+            to {
+                transform: scaleX(0);
+            }
+        }
+
+        .flash-message.hide {
+            animation: slideOutRight 0.5s ease-in forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flash-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+        }
+
+        .logo-container {
+            background-color: #212529;
+            /* لون خلفية bootstrap */
+            color: white;
+            text-align: center;
+            padding: 50px;
+            border-radius: 15px;
+        }
+
+        .logo-container img {
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .back-to-top {
+            position: fixed;
+            left: 20px;
+            /* وضعها في اليسار */
+            bottom: 30px;
+            /* مسافة من الأسفل */
+            color: white;
+            font-size: 12px;
+            padding: 10px 14px;
+            border-radius: 50%;
+            text-align: center;
+            text-decoration: none;
+            display: none;
+            /* مخفية بالافتراضي */
+            z-index: 1000;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-2px);
+        }
+
+        @media screen and (max-width: 768px) {
+            .back-to-top {
+                font-size: 20px;
+                padding: 10px 14px;
+                left: 15px;
+                /* ضبط للموبايل */
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body dir="rtl" class="bg-light">
+
+    <div class="container my-5" style="background-color: #FFFFFF;">
+        <div class="logo-container" style="background-color: #FFFFFF;">
+            <a href="{{url_for('store.index')}}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+            </a>
+            <div class="logo-text" style="color: #005d66;">
+                <span class="fs-2">مرحبا بك</span> <br> صفحة إدارة المتجر
+            </div>
+        </div>
+    </div>
+
+    <div class="section-divider">
+        <svg viewBox="0 0 1440 100">
+            <path fill="#ffffff" d="M0,0 L1440,0 L1440,100 L0,100 Z"></path>
+        </svg>
+    </div>
+
+    <!-- Section جدول المستخدمين -->
+    <section class="container-fluid py-5 bg-light" style="background-color: #dee2e6;">
+        <div class="container py-2" style="background-color: #dee2e6;">
+            <div class="table-responsive shadow-sm rounded  p-2 bg-light">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th scope="col" class="border border-2 rounded-3 py-4 fs-4"
+                                style="color:#FFFFFF; font-weight:bold;">المستخدمون المسجلون في المتجر
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        {% for user in users %}
+                        <tr>
+                            <td class="fw-bold">{{user['username']}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider">
+        <svg viewBox="0 0 1440 100">
+            <path fill="#ffffff" d="M0,0 L1440,0 L1440,100 L0,100 Z"></path>
+        </svg>
+    </div>
+
+    <!--  جدول المنتجات -->
+    <section class="container-fluid py-4 bg-light">
+        <div class="container">
+            <div class="container-fluid bg-dark">
+                <h2 class="text-center h5 py-4" style="color:#FFFFFF; font-weight: 700; font-size:2rem;">منتجات المتجر
+                </h2>
+            </div>
+            <a href="{{ url_for('admin.create_product') }}"
+                class="d-block w-100 text-center h5 py-2 rounded-3 btn btn-primary text-decoration-none"
+                style="color:#FFFFFF; font-weight:700; font-size:medium;">
+                اضافة منتج جديد
+            </a>
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th scope="col">اسم المنتج</th>
+                            <th scope="col">تفاصيل المنتج</th>
+                            <th scope="col">السعر</th>
+                            <th scope="col">الفئة</th>
+                            <th scope="col">خيارات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        {% for p in products%}
+                        <tr>
+                            <td>{{ p['name'] }}</td>
+                            <td>{{ p['details'] }}</td>
+                            <td>{{ p['price'] }}</td>
+                            <td>{{ p['category'] | translate_category }}</td> {# يحول اسماء الفئات الانجليزيه الى
+                            العربيه #}
+                            <td>
+                                <a href="{{ url_for('admin.edit_product', product_id=p['product_id']) }}"
+                                    class="btn btn-sm rounded-3 py-0 btn-success text-decoration-none">تعديل</a>
+
+                                <!-- Delete button (left side) -->
+                                <div class="col-auto">
+                                    <!-- الفورم مع زر يفتح المودال -->
+                                    <form id="delete-form-{{ p['product_id'] }}" class="delete-form"
+                                        action="{{ url_for('admin.delete_product', product_id=p['product_id']) }}"
+                                        method="POST">
+                                        {{ form.hidden_tag() if form is defined else '' }}
+                                        <button type="button" class="btn btn-sm rounded-3 py-0 btn-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmDeleteModal-{{ p['product_id'] }}">
+                                            حذف
+                                        </button>
+                                    </form>
+
+                                    <!-- مودال التأكيد -->
+                                    <div class="modal fade" id="confirmDeleteModal-{{ p['product_id'] }}" tabindex="-1"
+                                        aria-labelledby="confirmDeleteLabel-{{ p['product_id'] }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title"
+                                                        id="confirmDeleteLabel-{{ p['product_id'] }}">تأكيد
+                                                        الحذف</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    هل أنت متأكد أنك تريد حذف المنتج '<strong>{{ p['name'] }}</strong>'
+                                                    من
+                                                    المتجر؟ هذا الاجراء لا يمكن التراجع عنه.
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">إلغاء</button>
+                                                    <button type="button" class="btn btn-danger"
+                                                        onclick="document.getElementById('delete-form-{{ p.product_id }}').submit();">
+                                                        حذف
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- رسائل Flash -->
+    <div class="flash-container">
+        {% for message in get_flashed_messages() %}
+        <div class="flash-message" data-auto-close="5000">
+            <div class="flash-content">
+                <span class="flash-text">{{ message }}</span>
+            </div>
+            <div class="flash-progress"></div>
+        </div>
+        {% endfor %}
+    </div>
+    <a href="#" class="back-to-top" id="backToTop">
+        <img src="{{ url_for('static', filename='icons/arrow-up-square.svg') }}" alt="arrow-up-square.svg" height="40px"
+            width="40px">
+    </a>
+</body>
+
+<script>
+    (function () {
+        // مدة العرض (بـ ms) — اجعلها مساوية لمدة أنيميشن progressBar (هنا 5000)
+        var DISPLAY_MS = 5000;
+        // مدة انزلاق الخروج (مطابقة ل slideOutRight 0.5s)
+        var SLIDE_OUT_MS = 500;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var flashes = document.querySelectorAll('.flash-container .flash-message');
+            flashes.forEach(function (flash) {
+                // اضف حدث اغلاق بنقرة (اختياري)
+                flash.addEventListener('click', function () {
+                    hideAndRemove(flash);
+                });
+
+                // ابدأ عدّ المدة (يمكنك التأخير قليلاً لو أردت)
+                setTimeout(function () {
+                    hideAndRemove(flash);
+                }, DISPLAY_MS);
+            });
+
+            function hideAndRemove(el) {
+                if (!el) return;
+                // إذا كانت مخفية مسبقاً نمنع التكرار
+                if (el.classList.contains('hide')) return;
+                el.classList.add('hide'); // هذا يشغّل slideOutRight
+                // ازل العنصر بعد انتهاء انيميشن الخروج
+                setTimeout(function () {
+                    if (el && el.parentNode) el.parentNode.removeChild(el);
+                }, SLIDE_OUT_MS + 50);
+            }
+        });
+    })();
+</script>
+<!-- back to top -->
+<script>
+    const backToTopButton = document.getElementById("backToTop");
+
+    // إظهار الزر عند التمرير أكثر من 100px
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > 100) {
+            backToTopButton.style.display = "block";
+        } else {
+            backToTopButton.style.display = "none";
+        }
+    });
+
+    // عند الضغط، صعود للصفحة بسلاسة
+    backToTopButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+
+</html>
